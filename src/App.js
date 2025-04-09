@@ -9,7 +9,6 @@ import thunderstormIcon from '../src/images/thunderstorm.png';
 import snowIcon from '../src/images/winter.png';
 import rainyIcon from '../src/images/rain.png';
 import mistIcon from '../src/images/mist.png';
-import MessageAlert from './Weather';
 
 const NotFound = ({ error, loading, cityNotFound }) => {
   return(
@@ -70,8 +69,8 @@ const Weather = ({city, icon, temp, humidity, windSpeed, country,weatherInfo, te
 };
 
 function App() {
-  const API_Key = '3b213d87ced5afcfc0774f91afe223e4';
-
+  const key = process.env.REACT_APP_API_KEY;
+  
   const [text, setText] = useState("Madurai");
   const [temp, setTemp] = useState(0);
   const [City, setCity] = useState("");
@@ -84,6 +83,7 @@ function App() {
   const [cityNotFound, setCityNotFound] = useState(false);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
+
 
   const weatherIconMap = {
     "01d": clearSkyIcon,
@@ -110,7 +110,7 @@ function App() {
   // Search function
   const search = async () => {
     setLoading(true);
-    let url = `https://api.openweathermap.org/data/2.5/weather?q=${text}&appid=${API_Key}&units=metric`;
+    let url = `https://api.openweathermap.org/data/2.5/weather?q=${text}&appid=${key}&units=metric`;
 
     try {
       let response = await fetch(url);
