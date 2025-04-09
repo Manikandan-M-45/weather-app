@@ -1,0 +1,31 @@
+body{
+  background: #000;
+}
+.contact-main{
+  margin-top: 50px;
+  /* width: 100vw; */
+  height: 100%;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  background-color: black;
+  /* background-image: linear-gradient(aqua, blue); */
+   color: #000000;
+}   
+.container-contact{
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  width: 400px;
+  border-radius: 10px;
+  background-color: rgb(255,255,255);
+}
+
+.not_found{
+  background-color: white;
+  width: 400px;
+  margin-top: 10px;
+  padding-left: 40px;
+  text-align: center;
+  line-height: 5;
+}
