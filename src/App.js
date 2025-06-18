@@ -11,59 +11,83 @@ import rainyIcon from '../src/images/rain.png';
 import mistIcon from '../src/images/mist.png';
 
 const NotFound = ({ error, loading, cityNotFound }) => {
-  return(
-    <div className='not_found container'>
-      {/* <h2>{!cityNotFound && "city not found"} </h2>
-      <h2>{loading} </h2>
-      <h2>{error} </h2> */}
-      {!cityNotFound && <div>city not found</div>}
-      {loading && <div>Loading....</div>}
-      {error && <div>{error}</div>}
+  return (
+    <div className='not-found container text-center py-5'>
+      <div className='card not-found-card'>
+        {!cityNotFound && <div className='not-found-message'>City not found</div>}
+        {loading && (
+          <div className='loading-spinner'>
+            <div className='spinner-border text-primary' role='status'>
+              <span className='visually-hidden'>Loading...</span>
+            </div>
+          </div>
+        )}
+        {error && <div className='error-message alert alert-danger'>{error}</div>}
+      </div>
     </div>
-  )
-}
-const Weather = ({city, icon, temp, humidity, windSpeed, country,weatherInfo, text, error, loading, cityNotFound}) => {
+  );
+};
+
+const Weather = ({ city, icon, temp, humidity, windSpeed, country, weatherInfo }) => {
+  // Get current date and time
+  const [currentTime, setCurrentTime] = useState(new Date());
   
+  useEffect(() => {
+    const timer = setInterval(() => {
+      setCurrentTime(new Date());
+    }, 1000);
+    return () => clearInterval(timer);
+  }, []);
+
+  const formattedTime = currentTime.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+  const formattedDate = currentTime.toLocaleDateString([], { weekday: 'long', month: 'long', day: 'numeric' });
 
   return (
-    
-    <div className='contact-main text-center'>
-      
-      <div className='container-contact'>
-        
-        <form className='p-2'>
-          <div className="row align-items-center mx-auto">
-            <div className="col-6">
-              <label>City</label>
-              <h2   >{city}</h2>
-              <h4>{country}</h4>
-            </div>
-            <div className="col-6">
-              <h3>{temp}&#176;c</h3>
+    <div className='weather-container'>
+      <div className='weather-card card'>
+        <div className='card-body'>
+          {/* Location and Date Section */}
+          <div className='location-section mb-4'>
+            <h2 className='city-name'>{city}</h2>
+            <div className='country-date'>
+              <span className='country-badge badge bg-primary'>{country}</span>
+              <span className='date-time'>{formattedDate} • {formattedTime}</span>
             </div>
           </div>
           
-          <div className='row mt-2'>
-            <div className='col-6'>
-              <label><b>Humidity</b></label>
-              <h5>{humidity}%</h5>
+          {/* Main Weather Info */}
+          <div className='weather-main row align-items-center'>
+            <div className='col-md-6 temperature-section'>
+              <div className='temp-display'>
+                <span className='temperature'>{temp}</span>
+                <span className='temp-unit'>°C</span>
+              </div>
+              <h3 className='weather-description'>{weatherInfo}</h3>
             </div>
-            <div className='col-6'>
-              <label><b>Wind speed</b></label>
-              <h5>{windSpeed} Km/hr</h5>
+            <div className='col-md-6 text-center'>
+              <img src={icon} alt="Weather Icon" className='weather-icon' />
             </div>
           </div>
-          <div>
-            <div className='text-center'>
-              <img src={icon} alt="Weather Icon" width='100px' height='100px' className='img-weather'/>
+          
+          {/* Additional Weather Details */}
+          <div className='weather-details row mt-4'>
+            <div className='col-6 detail-item'>
+              <div className='detail-icon humidity-icon'></div>
+              <div className='detail-text'>
+                <span className='detail-label'>Humidity</span>
+                <span className='detail-value'>{humidity}%</span>
+              </div>
             </div>
-            <h3 className='text-center'>{weatherInfo}</h3>
+            <div className='col-6 detail-item'>
+              <div className='detail-icon wind-icon'></div>
+              <div className='detail-text'>
+                <span className='detail-label'>Wind Speed</span>
+                <span className='detail-value'>{windSpeed} km/h</span>
+              </div>
+            </div>
           </div>
-         
-        </form>
-        
+        </div>
       </div>
-      
     </div>
   );
 };
@@ -73,7 +97,7 @@ function App() {
   
   const [text, setText] = useState("Madurai");
   const [temp, setTemp] = useState(0);
-  const [City, setCity] = useState("");
+  const [city, setCity] = useState("");
   const [country, setCountry] = useState("");
   const [humidity, setHumidity] = useState(0);
   const [windSpeed, setWindSpeed] = useState(0);
@@ -83,7 +107,6 @@ function App() {
   const [cityNotFound, setCityNotFound] = useState(false);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
-
 
   const weatherIconMap = {
     "01d": clearSkyIcon,
@@ -105,11 +128,10 @@ function App() {
     "50d": mistIcon,
     "50n": mistIcon,
   };
-  console.log('rendered')
 
-  // Search function
   const search = async () => {
     setLoading(true);
+    setError(null);
     let url = `https://api.openweathermap.org/data/2.5/weather?q=${text}&appid=${key}&units=metric`;
 
     try {
@@ -117,7 +139,6 @@ function App() {
       let data = await response.json();
 
       if (data.cod === "404") {
-        console.error("City not found");
         setCityNotFound(true);
         setLoading(false); 
         return;
@@ -133,8 +154,8 @@ function App() {
       setIcon(weatherIconMap[weatherIconCode] || clearSkyIcon);
       setCityNotFound(false);
     } catch (error) {
+      setError("Error occurred while fetching weather data");
       console.error("Error: ", error.message);
-      setError("Error occured while fetching");
     } finally {
       setLoading(false);
     }
@@ -142,56 +163,61 @@ function App() {
 
   const handleChange = (e) => {
     setText(e.target.value);
-  }
+  };
 
   const handleKeyDown = (e) => {
     if (e.key === "Enter") {
       e.preventDefault(); 
       search();
     }
-    // console.error("Error: ", error);
   };
 
   useEffect(() => {
-  console.log('effect rendered')
-
     search();
-  }, [])
+  }, []);
+
   return (
-    <div className="container mt-5">
+    <div className="app-container">
       <div className='container'>
-            
-          <div className='row '>
-            <div className='col-5 d-flex mx-auto'>
-              <input
-                type="text"
-                className='form-control'
-                onChange={handleChange}
-                value={text}
-                onKeyDown={handleKeyDown}
-              />
-
-              <input
-                type="button"
-                value="Search"
-                className='btn btn-danger'
-            onClick={search}
-          />
+        <h1 className='app-title text-center mb-4'>Weather Forecast</h1>
+        
+        <div className='search-container'>
+          <div className='input-group mb-4'>
+            <input
+              type="text"
+              className='form-control search-input'
+              placeholder='Enter city name...'
+              onChange={handleChange}
+              value={text}
+              onKeyDown={handleKeyDown}
+            />
+            <button
+              className='btn btn-primary search-button'
+              onClick={search}
+              disabled={loading}
+            >
+              {loading ? 'Searching...' : 'Search'}
+            </button>
           </div>
+        </div>
 
-          </div>
+        <div className='weather-display'>
+          {loading || cityNotFound || error ? 
+            <NotFound error={error} loading={loading} cityNotFound={cityNotFound} /> : 
+            <Weather 
+              icon={icon} 
+              city={city} 
+              temp={temp} 
+              humidity={humidity} 
+              windSpeed={windSpeed} 
+              country={country} 
+              weatherInfo={weatherInfo} 
+            />
+          }
+        </div>
       </div>
-      <div className='mx-auto'>
-        {!loading && !cityNotFound ? <Weather icon={icon} city={City} temp={temp} humidity={humidity} windSpeed={windSpeed} country={country} weatherInfo={weatherInfo} text={text} loading={loading} error={error} cityNotFound={cityNotFound}/> : <NotFound/>}
-  
-
-      </div>
-
-
     </div>
   );
 }
 
 export default App;
-
-    
